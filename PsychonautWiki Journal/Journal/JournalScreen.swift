@@ -53,6 +53,9 @@ struct JournalScreen: View {
                             Label("Stats", systemImage: "chart.bar")
                         }
                     }
+                    Button("Add Data") {
+                        viewModel.createManyExperiencesAndIngestions()
+                    }
                 }
 
             }

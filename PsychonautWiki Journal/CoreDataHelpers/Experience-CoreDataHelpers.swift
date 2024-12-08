@@ -143,7 +143,7 @@ extension Experience: Comparable {
         }
     }
 
-    var interactions: [Interaction] {
+    func getInteractions() -> [Interaction] {
         let substanceNames = ingestionsSorted.map { $0.substanceNameUnwrapped }.uniqued()
         var interactions: [Interaction] = []
         for subIndex in 0 ..< substanceNames.count {
@@ -160,7 +160,7 @@ extension Experience: Comparable {
         })
     }
 
-    var substancesUsed: [Substance] {
+    func getSubstancesUsed() -> [Substance] {
         ingestionsSorted
             .map { $0.substanceNameUnwrapped }
             .uniqued()
@@ -224,14 +224,7 @@ extension Experience: Comparable {
         )
     }
 
-    struct ChartData {
-        let toleranceWindows: [ToleranceWindow]
-        let substancesInChart: [SubstanceWithToleranceAndColor]
-        let numberOfSubstancesInToleranceChart: Int
-        let namesOfSubstancesWithMissingTolerance: [String]
-    }
-
-    var chartData: ChartData {
+    func getChartData() -> ChartData {
         let lastIngestionDate = ingestionsSorted.last?.timeUnwrapped ?? Date.now
         let threeMonthsBefore = lastIngestionDate.addingTimeInterval(-3 * 30 * 24 * 60 * 60)
         let ingestionsForChart = PersistenceController.shared.getIngestionsBetween(startDate: threeMonthsBefore, endDate: lastIngestionDate).filter { ing in
@@ -269,3 +262,11 @@ extension Experience: Comparable {
         )
     }
 }
+
+struct ChartData {
+    let toleranceWindows: [ToleranceWindow]
+    let substancesInChart: [SubstanceWithToleranceAndColor]
+    let numberOfSubstancesInToleranceChart: Int
+    let namesOfSubstancesWithMissingTolerance: [String]
+}
+

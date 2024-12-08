@@ -21,6 +21,29 @@ import AppIntents
 struct ExperienceScreen: View {
     @ObservedObject var experience: Experience
 
+    @FetchRequest private var ingestions: FetchedResults<Ingestion>
+    @FetchRequest private var shulginRatings: FetchedResults<ShulginRating>
+    @FetchRequest private var timedNotes: FetchedResults<TimedNote>
+
+    init(experience: Experience) {
+        self.experience = experience
+        _ingestions = FetchRequest(
+            entity: Ingestion.entity(),
+            sortDescriptors: [NSSortDescriptor(keyPath: \Ingestion.time, ascending: false)],
+            predicate: NSPredicate(format: "experience == %@", experience)
+        )
+        _shulginRatings = FetchRequest(
+            entity: ShulginRating.entity(),
+            sortDescriptors: [NSSortDescriptor(keyPath: \ShulginRating.time, ascending: false)],
+            predicate: NSPredicate(format: "experience == %@", experience)
+        )
+        _timedNotes = FetchRequest(
+            entity: TimedNote.entity(),
+            sortDescriptors: [NSSortDescriptor(keyPath: \TimedNote.time, ascending: false)],
+            predicate: NSPredicate(format: "experience == %@", experience)
+        )
+    }
+
     @AppStorage(PersistenceController.timeDisplayStyleKey) private var timeDisplayStyleText: String = SaveableTimeDisplayStyle.auto.rawValue
 
     private var saveableTimeDisplayStyle: Binding<SaveableTimeDisplayStyle> {
@@ -55,6 +78,30 @@ struct ExperienceScreen: View {
     @State private var sheetToShow: SheetOption?
     @State private var hiddenIngestions: [ObjectIdentifier] = []
     @State private var hiddenRatings: [ObjectIdentifier] = []
+    @State private var myTimelineModel: TimelineModel?
+    @State private var myCumulativeDoses: [CumulativeDose] = []
+    @State private var chartData: ChartData?
+    @State private var consumersWithIngestions: [ConsumerWithIngestions] = []
+    @State private var interactions: [Interaction] = []
+    @State private var substancesUsed: [Substance] = []
+
+    private func calculateScreenInfo() {
+        Task {
+            let timelineModel = experience.getMyTimeLineModel(
+                hiddenIngestions: hiddenIngestions,
+                hiddenRatings: hiddenRatings,
+                areRedosesDrawnIndividually: areRedosesDrawnIndividually,
+                areSubstanceHeightsIndependent: areSubstanceHeightsIndependent
+            )
+            self.myTimelineModel = timelineModel
+            self.myCumulativeDoses = experience.myCumulativeDoses
+            self.chartData = experience.getChartData()
+            self.consumersWithIngestions = experience.getConsumers(hiddenIngestions: hiddenIngestions, areRedosesDrawnIndividually: areRedosesDrawnIndividually, areSubstanceHeightsIndependent: areSubstanceHeightsIndependent)
+            self.interactions = experience.getInteractions()
+            self.substancesUsed = experience.getSubstancesUsed()
+        }
+    }
+
     @AppStorage(PersistenceController.isEyeOpenKey2) var isEyeOpen: Bool = false
     @AppStorage(PersistenceController.isHidingDosageDotsKey) var isHidingDosageDots: Bool = false
     @AppStorage(PersistenceController.isHidingToleranceChartInExperienceKey) var isHidingToleranceChartInExperience: Bool = false
@@ -163,16 +210,10 @@ struct ExperienceScreen: View {
             }
         } screen: {
             List {
-                if !experience.myIngestionsSorted.isEmpty {
-                    let timelineModel = experience.getMyTimeLineModel(
-                        hiddenIngestions: hiddenIngestions,
-                        hiddenRatings: hiddenRatings,
-                        areRedosesDrawnIndividually: areRedosesDrawnIndividually,
-                        areSubstanceHeightsIndependent: areSubstanceHeightsIndependent
-                    )
+                if let myTimelineModel, !experience.myIngestionsSorted.isEmpty {
                     Section {
                         TimelineSection(
-                            timelineModel: timelineModel,
+                            timelineModel: myTimelineModel,
                             editIngestion: { ingestionToEdit in
                                 sheetToShow = .editIngestion(ingestion: ingestionToEdit)
                             },
@@ -184,7 +225,7 @@ struct ExperienceScreen: View {
                             isCurrentExperience: experience.isCurrent
                         )
                         if #available(iOS 16.2, *) {
-                            if experience.isCurrent && timelineModel.isWorthDrawing {
+                            if experience.isCurrent && myTimelineModel.isWorthDrawing {
                                 LiveActivityButton(
                                     stopLiveActivity: {
                                         stopLiveActivity()
@@ -200,15 +241,15 @@ struct ExperienceScreen: View {
                             Text(experience.sortDateUnwrapped, format: Date.FormatStyle().day().month().year().weekday(.abbreviated))
                             Spacer()
                             NavigationLink(value: GlobalNavigationDestination.timeline(
-                                timelineModel: timelineModel,
+                                timelineModel: myTimelineModel,
                                 timeDisplayStyle: timeDisplayStyle)) {
                                     Label("Timeline screen", systemImage: "arrow.down.left.and.arrow.up.right.square").labelStyle(.iconOnly)
                                 }
                         }
                     }
-                    if !experience.myCumulativeDoses.isEmpty && isEyeOpen {
+                    if !myCumulativeDoses.isEmpty && isEyeOpen {
                         Section("Your Cumulative Dose") {
-                            ForEach(experience.myCumulativeDoses) { cumulative in
+                            ForEach(myCumulativeDoses) { cumulative in
                                 if let substance = SubstanceRepo.shared.getSubstance(name: cumulative.substanceName) {
                                     NavigationLink(value: GlobalNavigationDestination.dose(substance: substance)) {
                                         CumulativeDoseRow(
@@ -285,11 +326,11 @@ struct ExperienceScreen: View {
                         firstIngestionTime: experience.ingestionsSorted.first?.timeUnwrapped
                     )
                 }
-                if !experience.chartData.toleranceWindows.isEmpty && !isHidingToleranceChartInExperience && isEyeOpen {
+                if let chartDataTolerence = chartData, !chartDataTolerence.toleranceWindows.isEmpty && !isHidingToleranceChartInExperience && isEyeOpen {
                     Section {
                         ToleranceChart(
-                            toleranceWindows: experience.chartData.toleranceWindows,
-                            numberOfRows: experience.chartData.numberOfSubstancesInToleranceChart,
+                            toleranceWindows: chartDataTolerence.toleranceWindows,
+                            numberOfRows: chartDataTolerence.numberOfSubstancesInToleranceChart,
                             timeOption: .onlyIfCurrentTimeInChart,
                             experienceStartDate: experience.sortDateUnwrapped.getDateWithoutTime(),
                             isTimeRelative: timeDisplayStyle == .relativeToNow
@@ -298,17 +339,17 @@ struct ExperienceScreen: View {
                         HStack {
                             Text("Tolerance")
                             Spacer()
-                            NavigationLink(value: GlobalNavigationDestination.toleranceTexts(substances: experience.chartData.substancesInChart)) {
+                            NavigationLink(value: GlobalNavigationDestination.toleranceTexts(substances: chartDataTolerence.substancesInChart)) {
                                 Label("Tolerance info", systemImage: "doc.plaintext").labelStyle(.iconOnly)
                             }
                         }
                     } footer: {
-                        if !experience.chartData.namesOfSubstancesWithMissingTolerance.isEmpty {
-                            Text("Excluding ") + Text(experience.chartData.namesOfSubstancesWithMissingTolerance, format: .list(type: .and))
+                        if !chartDataTolerence.namesOfSubstancesWithMissingTolerance.isEmpty {
+                            Text("Excluding ") + Text(chartDataTolerence.namesOfSubstancesWithMissingTolerance, format: .list(type: .and))
                         }
                     }
                 }
-                ForEach(experience.getConsumers(hiddenIngestions: hiddenIngestions, areRedosesDrawnIndividually: areRedosesDrawnIndividually, areSubstanceHeightsIndependent: areSubstanceHeightsIndependent)) { consumer in
+                ForEach(consumersWithIngestions) { consumer in
                     let consumerTimelineModel = consumer.timelineModel
                     Section {
                         TimelineSection(
@@ -335,20 +376,20 @@ struct ExperienceScreen: View {
                         }
                     }
                 }
-                if isEyeOpen && !isHidingSubstanceInfoInExperience && !experience.substancesUsed.isEmpty {
+                if isEyeOpen && !isHidingSubstanceInfoInExperience && !substancesUsed.isEmpty {
                     Section("Info") {
-                        ForEach(experience.substancesUsed) { substance in
+                        ForEach(substancesUsed) { substance in
                             NavigationLink(value: GlobalNavigationDestination.substance(substance: substance)) {
                                 Label(substance.name, systemImage: "info.circle")
                             }
                         }
-                        if experience.substancesUsed.contains(where: { $0.isHallucinogen }) {
+                        if substancesUsed.contains(where: { $0.isHallucinogen }) {
                             NavigationLink(value: GlobalNavigationDestination.saferHallucinogen) {
                                 Label("Safer Hallucinogens", systemImage: "cross")
                             }
                         }
-                        ForEach(experience.interactions) { interaction in
-                            NavigationLink(value: GlobalNavigationDestination.allInteractions(substancesToCheck: experience.substancesUsed)) {
+                        ForEach(interactions) { interaction in
+                            NavigationLink(value: GlobalNavigationDestination.allInteractions(substancesToCheck: substancesUsed)) {
                                 InteractionPairRow(
                                     aName: interaction.aName,
                                     bName: interaction.bName,
@@ -356,8 +397,8 @@ struct ExperienceScreen: View {
                                 )
                             }
                         }
-                        if experience.interactions.isEmpty {
-                            NavigationLink(value: GlobalNavigationDestination.allInteractions(substancesToCheck: experience.substancesUsed)) {
+                        if interactions.isEmpty {
+                            NavigationLink(value: GlobalNavigationDestination.allInteractions(substancesToCheck: substancesUsed)) {
                                 Label("See Interactions", systemImage: "exclamationmark.triangle")
                             }
                         }
@@ -420,6 +461,21 @@ struct ExperienceScreen: View {
                             isHidden: isHidden)
                     }
                 })
+        }
+        .onReceive(ingestions.publisher) { _ in
+            calculateScreenInfo()
+        }
+        .onReceive(shulginRatings.publisher) { _ in
+            calculateScreenInfo()
+        }
+        .onReceive(timedNotes.publisher) { _ in
+            calculateScreenInfo()
+        }
+        .onChange(of: hiddenRatings) { _ in
+            calculateScreenInfo()
+        }
+        .onChange(of: hiddenIngestions) { _ in
+            calculateScreenInfo()
         }
         .navigationTitle(experience.titleUnwrapped)
         .toolbar {

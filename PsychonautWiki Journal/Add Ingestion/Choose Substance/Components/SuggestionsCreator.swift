@@ -63,7 +63,7 @@ private func getSuggestionsForSubstanceAndRoute(substanceName: String, route: Ad
 }
 
 
-private let maxNumberOfSuggestions = 5
+private let maxNumberOfSuggestions = 8
 
 private func getPureSubstanceSuggestions(route: AdministrationRoute, pureSubstanceIngestions: [Ingestion]) -> PureSubstanceSuggestions? {
     if let ingestion = pureSubstanceIngestions.first, let substance = ingestion.substance {

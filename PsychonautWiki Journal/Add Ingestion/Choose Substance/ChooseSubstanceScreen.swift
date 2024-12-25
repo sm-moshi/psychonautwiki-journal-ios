@@ -42,7 +42,7 @@ struct ChooseSubstanceContent: View {
     @Binding var searchText: String
     @Binding var isShowingOpenEyeToast: Bool
     let isEyeOpen: Bool
-    let filteredSuggestions: [Suggestion]
+    let filteredSuggestions: [any SuggestionProtocol]
     let filteredSubstances: [Substance]
     let filteredCustomUnits: [CustomUnit]
     let filteredCustomSubstances: [CustomSubstanceModel]
@@ -122,6 +122,7 @@ struct ChooseSubstanceContent: View {
             LazyVStack(alignment: .leading) {
                 SiriTipView(intent: AddIngestionIntent(), isVisible: $isSiriTipVisible).padding(.horizontal)
                 ForEach(filteredSuggestions) { suggestion in
+                    
                     SuggestionBox(
                         suggestion: suggestion,
                         dismiss: dismiss,
@@ -162,128 +163,4 @@ struct ChooseSubstanceContent: View {
         .disableAutocorrection(true)
         .navigationBarTitle("New Ingestion")
     }
-}
-
-#Preview {
-    ChooseSubstanceContent(
-        searchText: .constant(""),
-        isShowingOpenEyeToast: .constant(false),
-        isEyeOpen: true,
-        filteredSuggestions: [
-            Suggestion(
-                substanceName: "Ketamine",
-                substance: SubstanceRepo.shared.getSubstance(name: "Ketamine"),
-                route: .insufflated,
-                substanceColor: .orange,
-                dosesAndUnit: [
-                    RegularDoseAndUnit(
-                        dose: 20,
-                        units: "mg",
-                        isEstimate: true,
-                        estimatedDoseStandardDeviation: 3),
-                    RegularDoseAndUnit(
-                        dose: 30,
-                        units: "mg",
-                        isEstimate: false,
-                        estimatedDoseStandardDeviation: nil),
-                ],
-                customUnitDoses: [
-                    CustomUnitDose(
-                        dose: 2,
-                        isEstimate: false,
-                        estimatedStandardDeviation: nil,
-                        customUnit: .previewSample)
-                ],
-                customUnits: [],
-                lastCreationTime: Date.now.addingTimeInterval(-2 * 60 * 60)),
-            Suggestion(
-                substanceName: "MDMA",
-                substance: SubstanceRepo.shared.getSubstance(name: "MDMA"),
-                route: .oral,
-                substanceColor: .pink,
-                dosesAndUnit: [
-                    RegularDoseAndUnit(
-                        dose: 20,
-                        units: "mg",
-                        isEstimate: false,
-                        estimatedDoseStandardDeviation: nil),
-                    RegularDoseAndUnit(
-                        dose: nil,
-                        units: "mg",
-                        isEstimate: false,
-                        estimatedDoseStandardDeviation: nil),
-                    RegularDoseAndUnit(
-                        dose: 30,
-                        units: "mg",
-                        isEstimate: false,
-                        estimatedDoseStandardDeviation: nil),
-                ],
-                customUnitDoses: [],
-                customUnits: [],
-                lastCreationTime: Date.now.addingTimeInterval(-2 * 60 * 60)
-            ),
-            Suggestion(
-                substanceName: "Cannabis",
-                substance: SubstanceRepo.shared.getSubstance(name: "Cannabis"),
-                route: .smoked,
-                substanceColor: .green,
-                dosesAndUnit: [
-                    RegularDoseAndUnit(
-                        dose: 3,
-                        units: "mg",
-                        isEstimate: false,
-                        estimatedDoseStandardDeviation: nil),
-                    RegularDoseAndUnit(
-                        dose: 6,
-                        units: "mg",
-                        isEstimate: true,
-                        estimatedDoseStandardDeviation: 1),
-                    RegularDoseAndUnit(
-                        dose: nil,
-                        units: "mg",
-                        isEstimate: false,
-                        estimatedDoseStandardDeviation: nil),
-                    RegularDoseAndUnit(
-                        dose: 2.5,
-                        units: "mg",
-                        isEstimate: false,
-                        estimatedDoseStandardDeviation: nil),
-                ],
-                customUnitDoses: [],
-                customUnits: [],
-                lastCreationTime: Date.now.addingTimeInterval(-2 * 60 * 60)
-            ),
-            Suggestion(
-                substanceName: "Coffee",
-                substance: nil,
-                route: .oral,
-                substanceColor: .brown,
-                dosesAndUnit: [
-                    RegularDoseAndUnit(
-                        dose: 1,
-                        units: "cups",
-                        isEstimate: false,
-                        estimatedDoseStandardDeviation: nil),
-                    RegularDoseAndUnit(
-                        dose: 3,
-                        units: "cups",
-                        isEstimate: false,
-                        estimatedDoseStandardDeviation: nil),
-                ],
-                customUnitDoses: [],
-                customUnits: [],
-                lastCreationTime: Date.now.addingTimeInterval(-2 * 60 * 60)
-            ),
-        ],
-        filteredSubstances: Array(SubstanceRepo.shared.substances.prefix(10)),
-        filteredCustomUnits: [
-            .previewSample
-        ],
-        filteredCustomSubstances: [
-            CustomSubstanceModel(
-                name: "Coffee",
-                description: "The bitter drink",
-                units: "cups"),
-        ],
-        dismiss: { })
 }

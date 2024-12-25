@@ -125,8 +125,7 @@ struct ChooseSubstanceContent: View {
                     if let pureSubstanceSuggestions = suggestion as? PureSubstanceSuggestions {
                         PureSubstanceSuggestionView(pureSubstanceSuggestions: pureSubstanceSuggestions, isEyeOpen: isEyeOpen)
                     } else if let customUnitSuggestions = suggestion as? CustomUnitSuggestions {
-                        let customUnit = customUnitSuggestions.customUnit
-                        Text(customUnit.substanceNameUnwrapped + ", " + customUnit.nameUnwrapped)
+                        CustomUnitSuggestionView(customUnitSuggestions: customUnitSuggestions)
                     } else if let customSubstanceSuggestions = suggestion as? CustomSubstanceSuggestions {
                         Text("Custom substance: \(customSubstanceSuggestions.customSubstanceName)")
                     }

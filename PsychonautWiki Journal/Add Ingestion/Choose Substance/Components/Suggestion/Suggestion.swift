@@ -88,8 +88,13 @@ struct CustomSubstanceSuggestions: SuggestionProtocol {
     }
 }
 
-struct CustomUnitDoseSuggestion {
+struct CustomUnitDoseSuggestion: Identifiable, Equatable {
+    let id = UUID()
     let dose: Double?
     let isEstimate: Bool
     let estimatedStandardDeviation: Double?
+
+    static func ==(lhs: Self, rhs: Self) -> Bool {
+        lhs.dose == rhs.dose && lhs.isEstimate == rhs.isEstimate && lhs.estimatedStandardDeviation == rhs.estimatedStandardDeviation
+    }
 }

@@ -74,7 +74,7 @@ private func getPureSubstanceSuggestions(route: AdministrationRoute, pureSubstan
             route: route,
             substance: substance,
             substanceColor: ingestion.substanceColor,
-            dosesAndUnit: Array(dosesAndUnit.prefix(maxNumberOfSuggestions)),
+            dosesAndUnit: Array(dosesAndUnit.uniqued().prefix(maxNumberOfSuggestions)),
             sortDate: pureSubstanceIngestions.compactMap { $0.creationDate }.max() ?? Date.distantPast
         )
     }
@@ -93,7 +93,7 @@ private func getGroupOfCustomUnitSuggestions(route: AdministrationRoute, ingesti
                     isEstimate: ingestion.isEstimate,
                     estimatedStandardDeviation: ingestion.estimatedDoseStandardDeviationUnwrapped
                 )
-            }).prefix(maxNumberOfSuggestions))
+            }).uniqued().prefix(maxNumberOfSuggestions))
             return CustomUnitSuggestions(
                 customUnit: customUnit,
                 doses: doses,

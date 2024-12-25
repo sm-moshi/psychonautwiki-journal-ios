@@ -30,43 +30,39 @@ struct PureSubstanceSuggestionView: View {
                 systemImage: "circle.fill")
             .font(.headline)
             .foregroundColor(pureSubstanceSuggestions.substanceColor.swiftUIColor)
-            if !pureSubstanceSuggestions.dosesAndUnit.isEmpty {
-                WrappingHStack(
-                    alignment: .leading,
-                    horizontalSpacing: horizontalSpacing,
-                    verticalSpacing: verticalSpacing)
-                {
-                    ForEach(pureSubstanceSuggestions.dosesAndUnit) { doseAndUnit in
-                        if let doseDescription = doseAndUnit.doseDescription {
-                            NavigationLink(
-                                doseDescription,
-                                value: FinishIngestionScreenArguments(
-                                    substanceName: pureSubstanceSuggestions.substance.name,
-                                    administrationRoute: pureSubstanceSuggestions.route,
-                                    dose: doseAndUnit.dose,
-                                    units: doseAndUnit.units,
-                                    isEstimate: doseAndUnit.isEstimate,
-                                    estimatedDoseStandardDeviation: doseAndUnit.estimatedDoseStandardDeviation))
-                            .buttonStyle(.bordered).fixedSize()
-                        } else {
-                            NavigationLink("Unknown", value: FinishIngestionScreenArguments(
+            WrappingHStack(
+                alignment: .leading,
+                horizontalSpacing: horizontalSpacing,
+                verticalSpacing: verticalSpacing)
+            {
+                ForEach(pureSubstanceSuggestions.dosesAndUnit) { doseAndUnit in
+                    if let doseDescription = doseAndUnit.doseDescription {
+                        NavigationLink(
+                            doseDescription,
+                            value: FinishIngestionScreenArguments(
                                 substanceName: pureSubstanceSuggestions.substance.name,
                                 administrationRoute: pureSubstanceSuggestions.route,
                                 dose: doseAndUnit.dose,
                                 units: doseAndUnit.units,
                                 isEstimate: doseAndUnit.isEstimate,
-                                estimatedDoseStandardDeviation: nil
-                            ))
-                            .buttonStyle(.bordered).fixedSize()
-                        }
-                    }
-                    if let units = pureSubstanceSuggestions.dosesAndUnit.first?.units {
-                        NavigationLink(
-                            "Log \(units)",
-                            value: SubstanceAndRoute(substance: pureSubstanceSuggestions.substance, administrationRoute: pureSubstanceSuggestions.route))
-                        .buttonStyle(.borderedProminent).fixedSize()
+                                estimatedDoseStandardDeviation: doseAndUnit.estimatedDoseStandardDeviation))
+                        .buttonStyle(.bordered).fixedSize()
+                    } else {
+                        NavigationLink("Unknown", value: FinishIngestionScreenArguments(
+                            substanceName: pureSubstanceSuggestions.substance.name,
+                            administrationRoute: pureSubstanceSuggestions.route,
+                            dose: doseAndUnit.dose,
+                            units: doseAndUnit.units,
+                            isEstimate: doseAndUnit.isEstimate,
+                            estimatedDoseStandardDeviation: nil
+                        ))
+                        .buttonStyle(.bordered).fixedSize()
                     }
                 }
+                NavigationLink(
+                    "Other dose",
+                    value: SubstanceAndRoute(substance: pureSubstanceSuggestions.substance, administrationRoute: pureSubstanceSuggestions.route))
+                .buttonStyle(.borderedProminent).fixedSize()
             }
         }
         .padding(.top, 4)

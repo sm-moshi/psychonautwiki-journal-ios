@@ -123,7 +123,7 @@ struct ChooseSubstanceContent: View {
                 SiriTipView(intent: AddIngestionIntent(), isVisible: $isSiriTipVisible).padding(.horizontal)
                 ForEach(filteredSuggestions, id: \.id) { suggestion in
                     if let pureSubstanceSuggestions = suggestion as? PureSubstanceSuggestions {
-                        Text(pureSubstanceSuggestions.substance.name)
+                        PureSubstanceSuggestionView(pureSubstanceSuggestions: pureSubstanceSuggestions, isEyeOpen: isEyeOpen)
                     } else if let customUnitSuggestions = suggestion as? CustomUnitSuggestions {
                         let customUnit = customUnitSuggestions.customUnit
                         Text(customUnit.substanceNameUnwrapped + ", " + customUnit.nameUnwrapped)

@@ -104,7 +104,9 @@ struct ChooseSubstanceContent: View {
                 }
             }
             .navigationDestination(for: CustomUnit.self) { customUnit in
-                CustomUnitsChooseDoseScreen(customUnit: customUnit, dismiss: dismiss)
+                CustomUnitsChooseDoseScreen(customUnit: customUnit, dismiss: dismiss, navigateToCustomUnitChooseDose: { newCustomUnit in
+                    navPath.append(newCustomUnit)
+                })
             }
         }
         .toast(isPresenting: $isShowingOpenEyeToast, duration: 1) {

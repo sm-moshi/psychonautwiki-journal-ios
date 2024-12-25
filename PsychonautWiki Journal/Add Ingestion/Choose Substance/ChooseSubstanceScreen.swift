@@ -127,7 +127,7 @@ struct ChooseSubstanceContent: View {
                     } else if let customUnitSuggestions = suggestion as? CustomUnitSuggestions {
                         CustomUnitSuggestionView(customUnitSuggestions: customUnitSuggestions)
                     } else if let customSubstanceSuggestions = suggestion as? CustomSubstanceSuggestions {
-                        Text("Custom substance: \(customSubstanceSuggestions.customSubstanceName)")
+                        CustomSubstanceSuggestionView(customSubstanceSuggestions: customSubstanceSuggestions, isEyeOpen: isEyeOpen)
                     }
                 }
                 ForEach(filteredCustomUnits) { customUnit in

@@ -83,14 +83,9 @@ struct CustomSubstanceSuggestionView: View {
 
 #Preview {
     NavigationStack {
-        PureSubstanceSuggestionView(
-            pureSubstanceSuggestions: PureSubstanceSuggestions(route: .oral, substance: SubstanceRepo.shared.getSubstance(name: "MDMA")!, substanceColor: .pink, dosesAndUnit: [
-                RegularDoseAndUnit(dose: 50, units: "mg", isEstimate: false, estimatedDoseStandardDeviation: nil),
-                RegularDoseAndUnit(dose: 80, units: "mg", isEstimate: false, estimatedDoseStandardDeviation: nil),
-                RegularDoseAndUnit(dose: 120, units: "mg", isEstimate: false, estimatedDoseStandardDeviation: nil),
-                RegularDoseAndUnit(dose: 30, units: "mg", isEstimate: false, estimatedDoseStandardDeviation: nil),
-                RegularDoseAndUnit(dose: 100, units: "mg", isEstimate: true, estimatedDoseStandardDeviation: 20)
-            ], sortDate: .now),
-            isEyeOpen: true)
+        CustomSubstanceSuggestionView(customSubstanceSuggestions: CustomSubstanceSuggestions(administrationRoute: .oral, customSubstanceName: "Amanita muscaria", dosesAndUnit: [
+            RegularDoseAndUnit(dose: 3, units: "g", isEstimate: false, estimatedDoseStandardDeviation: nil),
+            RegularDoseAndUnit(dose: 4, units: "g", isEstimate: true, estimatedDoseStandardDeviation: 1)
+        ], substanceColor: .orange, sortDate: .now), isEyeOpen: true)
     }
 }

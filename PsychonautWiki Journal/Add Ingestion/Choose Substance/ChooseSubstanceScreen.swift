@@ -121,16 +121,15 @@ struct ChooseSubstanceContent: View {
         ScrollView {
             LazyVStack(alignment: .leading) {
                 SiriTipView(intent: AddIngestionIntent(), isVisible: $isSiriTipVisible).padding(.horizontal)
-                ForEach(filteredSuggestions) { suggestion in
-                    
-                    SuggestionBox(
-                        suggestion: suggestion,
-                        dismiss: dismiss,
-                        isEyeOpen: isEyeOpen,
-                        navigateToCustomUnitChooseDose: { customUnit in
-                            navPath.append(customUnit)
-                        }
-                    )
+                ForEach(filteredSuggestions, id: \.id) { suggestion in
+                    if let pureSubstanceSuggestions = suggestion as? PureSubstanceSuggestions {
+                        Text(pureSubstanceSuggestions.substance.name)
+                    } else if let customUnitSuggestions = suggestion as? CustomUnitSuggestions {
+                        let customUnit = customUnitSuggestions.customUnit
+                        Text(customUnit.substanceNameUnwrapped + ", " + customUnit.nameUnwrapped)
+                    } else if let customSubstanceSuggestions = suggestion as? CustomSubstanceSuggestions {
+                        Text("Custom substance: \(customSubstanceSuggestions.customSubstanceName)")
+                    }
                 }
                 ForEach(filteredCustomUnits) { customUnit in
                     CustomUnitBox(customUnit: customUnit)

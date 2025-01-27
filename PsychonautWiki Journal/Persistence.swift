@@ -152,7 +152,7 @@ struct PersistenceController {
             for ingestion in allIngestions {
                 if ingestion.substanceName == "Benzydamine" && ingestion.units == "g" {
                     ingestion.units = "mg"
-                    ingestion.dose = ingestion.dose * 1000
+                    ingestion.dose *= 1000
                 }
             }
             try? viewContext.save()

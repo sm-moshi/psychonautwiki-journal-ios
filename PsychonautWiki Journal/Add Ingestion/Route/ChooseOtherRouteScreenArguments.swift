@@ -19,4 +19,15 @@ import Foundation
 struct ChooseOtherRouteScreenArguments: Hashable {
     let substance: Substance
     let otherRoutes: [AdministrationRoute]
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(substance)
+        hasher.combine(otherRoutes)
+    }
+}
+
+extension ChooseOtherRouteScreenArguments: Equatable {
+    static func == (lhs: ChooseOtherRouteScreenArguments, rhs: ChooseOtherRouteScreenArguments) -> Bool {
+        return lhs.substance == rhs.substance && lhs.otherRoutes == rhs.otherRoutes
+    }
 }

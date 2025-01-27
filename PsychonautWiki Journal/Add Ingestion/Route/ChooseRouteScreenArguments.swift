@@ -19,3 +19,15 @@ import Foundation
 struct ChooseRouteScreenArguments: Hashable {
     let substance: Substance
 }
+
+extension ChooseRouteScreenArguments: Equatable {
+    static func == (lhs: ChooseRouteScreenArguments, rhs: ChooseRouteScreenArguments) -> Bool {
+        return lhs.substance == rhs.substance
+    }
+}
+
+extension ChooseRouteScreenArguments {
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(substance)
+    }
+}

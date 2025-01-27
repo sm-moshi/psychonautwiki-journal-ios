@@ -21,3 +21,33 @@ enum AddIngestionDestination: Hashable {
     case saferUse(substance: Substance)
     case saferRoutes
 }
+
+extension AddIngestionDestination: Equatable {
+    static func == (lhs: AddIngestionDestination, rhs: AddIngestionDestination) -> Bool {
+        switch (lhs, rhs) {
+        case (.interactions(let lhs), .interactions(let rhs)):
+            return lhs == rhs
+        case (.saferUse(let lhs), .saferUse(let rhs)):
+            return lhs == rhs
+        case (.saferRoutes, .saferRoutes):
+            return true
+        default:
+            return false
+        }
+    }
+}
+
+extension AddIngestionDestination {
+    func hash(into hasher: inout Hasher) {
+        switch self {
+        case .interactions(let substance):
+            hasher.combine(0)
+            hasher.combine(substance)
+        case .saferUse(let substance):
+            hasher.combine(1)
+            hasher.combine(substance)
+        case .saferRoutes:
+            hasher.combine(2)
+        }
+    }
+}
